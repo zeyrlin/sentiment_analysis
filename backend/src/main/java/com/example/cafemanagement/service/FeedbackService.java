@@ -1,23 +1,26 @@
 package com.example.cafemanagement.service;
 
 import com.example.cafemanagement.entity.Feedback;
+import com.example.cafemanagement.entity.User;
 import com.example.cafemanagement.repository.FeedbackRepository;
+import com.example.cafemanagement.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
+import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
-import java.lang.String;
 
 @Service
 public class FeedbackService {
 
     @Autowired
     private FeedbackRepository feedbackRepository;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -34,9 +37,6 @@ public class FeedbackService {
                 System.err.println("Flask API returned non-successful status: " + response.getStatusCode());
                 throw new RuntimeException("Flask API returned non-successful status: " + response.getStatusCode());
             }
-        } catch (HttpClientErrorException e) {
-            System.err.println("HTTP Client Error: " + e.getStatusCode() + " - " + e.getStatusText());
-            throw e;
         } catch (Exception e) {
             System.err.println("Unexpected error: " + e.getMessage());
             e.printStackTrace();
@@ -44,13 +44,12 @@ public class FeedbackService {
         }
     }
 
-    public void saveFeedback(String review) {
-        String sentiment = analyzeSentiment(review);
-        Feedback feedback = new Feedback(review, sentiment);
+    public void saveFeedback(String review, String sentiment, String username) {
+        Feedback feedback = new Feedback(review, sentiment, username);
         feedbackRepository.save(feedback);
     }
 
-    public List<Feedback> getAllFeedback(PageRequest pageRequest) {
+    public List<Feedback> getAllFeedback() {
         return feedbackRepository.findAll();
     }
 }

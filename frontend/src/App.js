@@ -1,5 +1,6 @@
+// frontend/src/App.js
 import React, { useState, useEffect } from "react";
-import { BrowserRouter as Router, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter as Router, Routes, Route, Navigate, Link } from "react-router-dom";
 import Home from "./components/Home";
 import Login from "./components/Login";
 import CustomerMenu from "./components/CustomerMenu";
@@ -11,6 +12,9 @@ import AdminOrderManagement from "./components/AdminOrderManagement";
 import AdminTableManagement from "./components/AdminTableManagement";
 import AdminFeedbackSentiment from "./components/AdminFeedbackSentiment";
 import AdminPromotions from "./components/AdminPromotions";
+import "bootstrap/dist/css/bootstrap.min.css";
+import "./App.css";
+import { Button } from "react-bootstrap";
 
 const App = () => {
     const [token, setToken] = useState(localStorage.getItem("token") || "");
@@ -42,10 +46,12 @@ const App = () => {
                 <header className="App-header">
                     <h1>Cafe Management System</h1>
                     {token ? (
-                        <button onClick={handleLogout}>Logout</button>
+                        <Button variant="secondary" onClick={handleLogout}>
+                            Logout
+                        </Button>
                     ) : (
                         <Link to="/login">
-                            <button>Login</button>
+                            <Button variant="primary">Login</Button>
                         </Link>
                     )}
                 </header>

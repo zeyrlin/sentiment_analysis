@@ -19,13 +19,15 @@ public class CustomerController {
 
     // Fetch the menu for customers to browse
     @GetMapping("/menu")
-    public ResponseEntity<List<?>> getMenu() {
-        return ResponseEntity.ok(userService.getMenu());
+    public ResponseEntity<?> getMenu(@RequestParam(defaultValue = "0") int page,
+                                     @RequestParam(defaultValue = "10") int size,
+                                     @RequestHeader("Authorization") String token) {
+        return ResponseEntity.ok(userService.getMenu(page, size));
     }
 
     // Place an order
     @PostMapping("/order/place")
-    public ResponseEntity<String> placeOrder(@RequestBody Map<String, Object> orderDetails) {
+    public ResponseEntity<String> placeOrder(@RequestBody Map<String, Object> orderDetails, @RequestHeader("Authorization") String token) {
         String customerName = (String) orderDetails.get("customerName");
         List<String> items = (List<String>) orderDetails.get("items");
         Double totalAmountDouble = (Double) orderDetails.get("totalAmount");
@@ -38,17 +40,16 @@ public class CustomerController {
 
     // Submit feedback
     @PostMapping("/feedback/submit")
-    public ResponseEntity<String> submitFeedback(@RequestBody Map<String, String> feedbackDetails) {
+    public ResponseEntity<String> submitFeedback(@RequestBody Map<String, String> feedbackDetails, @RequestHeader("Authorization") String token) {
         String review = feedbackDetails.get("review");
-        String sentiment = feedbackDetails.get("sentiment");
         String username = feedbackDetails.get("username");
-        userService.submitFeedback(review, sentiment, username);
+        userService.submitFeedback(review, username);
         return ResponseEntity.ok("Feedback submitted successfully!");
     }
 
     // Check loyalty points balance
     @GetMapping("/loyalty-points/{username}")
-    public ResponseEntity<Integer> getLoyaltyPoints(@PathVariable String username) {
+    public ResponseEntity<Integer> getLoyaltyPoints(@PathVariable String username, @RequestHeader("Authorization") String token) {
         return ResponseEntity.ok(userService.getLoyaltyPoints(username));
     }
 }

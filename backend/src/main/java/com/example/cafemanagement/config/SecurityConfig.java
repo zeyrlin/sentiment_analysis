@@ -8,6 +8,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.web.client.RestTemplate;
 import org.springframework.web.servlet.config.annotation.CorsRegistry;
 import org.springframework.web.servlet.config.annotation.WebMvcConfigurer;
 
@@ -50,4 +51,11 @@ public class SecurityConfig {
             }
         };
     }
+
+    // Define RestTemplate bean
+    @Bean
+    public RestTemplate restTemplate() {
+        return new RestTemplate();
+    }
 }
+

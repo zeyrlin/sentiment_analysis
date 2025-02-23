@@ -2,6 +2,7 @@ package com.example.cafemanagement.controller;
 
 import com.example.cafemanagement.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -18,10 +19,11 @@ public class AdminController {
     @Autowired
     private UserService userService;
 
-    // Fetch all menu items
+    // Fetch all menu items with pagination
     @GetMapping("/menu")
-    public ResponseEntity<List<?>> getMenu() {
-        return ResponseEntity.ok(userService.getMenu());
+    public ResponseEntity<Page<?>> getMenu(@RequestParam(defaultValue = "0") int page,
+                                           @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(userService.getMenu(page, size));
     }
 
     // Add a new menu item
@@ -57,10 +59,11 @@ public class AdminController {
         return ResponseEntity.ok("Menu item deleted successfully!");
     }
 
-    // View all orders
+    // View all orders with pagination
     @GetMapping("/orders")
-    public ResponseEntity<List<?>> getAllOrders() {
-        return ResponseEntity.ok(userService.getAllOrders());
+    public ResponseEntity<Page<?>> getAllOrders(@RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(userService.getAllOrders(page, size));
     }
 
     // Update order status
@@ -76,10 +79,11 @@ public class AdminController {
         return ResponseEntity.ok("Order status updated successfully!");
     }
 
-    // Get all tables
+    // Get all tables with pagination
     @GetMapping("/tables")
-    public ResponseEntity<List<?>> getAllTables() {
-        return ResponseEntity.ok(userService.getAllTables());
+    public ResponseEntity<Page<?>> getAllTables(@RequestParam(defaultValue = "0") int page,
+                                                @RequestParam(defaultValue = "10") int size) {
+        return ResponseEntity.ok(userService.getAllTables(page, size));
     }
 
     // Update table status

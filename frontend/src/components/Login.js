@@ -5,61 +5,53 @@ import { useNavigate } from "react-router-dom";
 const Login = ({ setIsAdminLoggedIn, setIsCustomerLoggedIn, setToken }) => {
     const [username, setUsername] = useState("");
     const [password, setPassword] = useState("");
-    const [role, setRole] = useState("CUSTOMER");
-    const [error, setError] = useState("");
     const navigate = useNavigate();
 
-    const handleSubmit = async (e) => {
-        e.preventDefault();
+    const handleLogin = async () => {
         try {
             const response = await axios.post("http://localhost:8080/api/auth/login", {
                 username,
                 password,
             });
-            if (response.status === 200) {
-                setToken(response.data);
-                localStorage.setItem("token", response.data);
-                localStorage.setItem("role", role);
-                if (role === "ADMIN") {
-                    setIsAdminLoggedIn(true);
-                } else {
-                    setIsCustomerLoggedIn(true);
-                }
-                navigate("/");
+
+            const token = response.data.token;
+            localStorage.setItem("token", token);
+
+            // Determine user role
+            const role = response.data.role || "CUSTOMER"; // Default to CUSTOMER if role is not returned
+            localStorage.setItem("role", role);
+
+            setToken(token);
+            if (role === "ADMIN") {
+                setIsAdminLoggedIn(true);
+                navigate("/admin");
+            } else {
+                setIsCustomerLoggedIn(true);
+                navigate("/menu");
             }
-        } catch (err) {
-            setError("Invalid username or password.");
+        } catch (error) {
+            alert("Invalid username or password.");
         }
     };
 
     return (
         <div>
             <h2>Login</h2>
-            <form onSubmit={handleSubmit}>
-                <input
-                    type="text"
-                    placeholder="Username"
-                    value={username}
-                    onChange={(e) => setUsername(e.target.value)}
-                    required
-                />
-                <br />
-                <input
-                    type="password"
-                    placeholder="Password"
-                    value={password}
-                    onChange={(e) => setPassword(e.target.value)}
-                    required
-                />
-                <br />
-                <select value={role} onChange={(e) => setRole(e.target.value)}>
-                    <option value="CUSTOMER">Customer</option>
-                    <option value="ADMIN">Admin</option>
-                </select>
-                <br />
-                <button type="submit">Login</button>
-                {error && <p>{error}</p>}
-            </form>
+            <input
+                type="text"
+                placeholder="Username"
+                value={username}
+                onChange={(e) => setUsername(e.target.value)}
+            />
+            <br />
+            <input
+                type="password"
+                placeholder="Password"
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+            />
+            <br />
+            <button onClick={handleLogin}>Login</button>
         </div>
     );
 };

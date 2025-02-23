@@ -1,9 +1,12 @@
 package com.example.cafemanagement.entity;
 
 import jakarta.persistence.*;
+import lombok.Data;
+
 import java.time.LocalDateTime;
 
 @Entity
+@Data
 public class User {
 
     @Id
@@ -20,7 +23,7 @@ public class User {
     private String role; // "ADMIN" or "CUSTOMER"
 
     @Column(nullable = false)
-    private int loyaltyPoints; // For customers only
+    private int loyaltyPoints=0; // For customers only
 
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;

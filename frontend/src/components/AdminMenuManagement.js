@@ -1,3 +1,4 @@
+// frontend/src/components/AdminMenuManagement.js
 import React, { useEffect, useState } from "react";
 import { getAllMenuItemsAdmin, addMenuItem, updateMenuItem, deleteMenuItem } from "../services/api";
 import { Table, Button, Modal, Form, Pagination } from "react-bootstrap";

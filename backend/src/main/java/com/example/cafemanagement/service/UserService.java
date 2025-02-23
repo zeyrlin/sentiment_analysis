@@ -11,15 +11,23 @@ import com.example.cafemanagement.repository.OrderRepository;
 import com.example.cafemanagement.repository.TableRepository;
 import com.example.cafemanagement.repository.UserRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
+import org.springframework.data.domain.Pageable;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
+import java.util.Date;
 import java.math.BigDecimal;
 import java.time.LocalDateTime;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Optional;
+
 
 @Service
 public class UserService {
@@ -42,22 +50,33 @@ public class UserService {
     @Autowired
     private PasswordEncoder passwordEncoder;
 
+    @Autowired
+    private FeedbackService feedbackService;
+
     // User Registration
     public void registerUser(String username, String password, String role) throws Exception {
         if (userRepository.existsByUsername(username)) {
             throw new Exception("Username already exists.");
         }
-        User user = new User(username, passwordEncoder.encode(password), role);
-        userRepository.save(user);
+
+        User user = new User();
+        user.setUsername(username);
+        user.setPassword(passwordEncoder.encode(password)); // Hash the password
+        user.setRole(role);
+
+        userRepository.save(user); // Save the user to the database
     }
 
     // User Login
     public String loginUser(String username, String password) throws Exception {
         User user = userRepository.findByUsername(username)
                 .orElseThrow(() -> new Exception("Invalid username or password."));
+
+        // Compare the provided password with the hashed password in the database
         if (!passwordEncoder.matches(password, user.getPassword())) {
             throw new Exception("Invalid username or password.");
         }
+
         return generateToken(user); // Generate JWT token
     }
 
@@ -74,15 +93,16 @@ public class UserService {
         }
     }
 
-    // Fetch Menu Items
-    public List<MenuItem> getMenu() {
-        return menuItemRepository.findAll();
+    // Fetch Menu Items with Pagination
+    public Page<MenuItem> getMenu(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return menuItemRepository.findAll(pageable);
     }
 
     // Submit Feedback
-    public void submitFeedback(String review, String sentiment, String username) {
-        Feedback feedback = new Feedback(review, sentiment, username);
-        feedbackRepository.save(feedback);
+    public void submitFeedback(String review, String username) {
+        String sentiment = feedbackService.analyzeSentiment(review);
+        feedbackService.saveFeedback(review, sentiment, username);
     }
 
     // Get Loyalty Points Balance
@@ -114,9 +134,10 @@ public class UserService {
         menuItemRepository.deleteById(id);
     }
 
-    // Get all orders
-    public List<Order> getAllOrders() {
-        return orderRepository.findAll();
+    // Get all orders with Pagination
+    public Page<Order> getAllOrders(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return orderRepository.findAll(pageable);
     }
 
     // Update order status
@@ -130,9 +151,10 @@ public class UserService {
         orderRepository.save(order);
     }
 
-    // Get all tables
-    public List<Table> getAllTables() {
-        return tableRepository.findAll();
+    // Get all tables with Pagination
+    public Page<Table> getAllTables(int page, int size) {
+        Pageable pageable = PageRequest.of(page, size);
+        return tableRepository.findAll(pageable);
     }
 
     // Update table status
@@ -160,8 +182,17 @@ public class UserService {
     }
 
     // Private Method to Generate Token
+    @Value("${jwt.secret.key}")
+    private String secretKey;
+
     private String generateToken(User user) {
-        // Use a library like jjwt to generate JWT tokens in production
-        return user.getUsername(); // Simplified for now
+        long expirationTimeInMillis = 3600000; // 1 hour
+        return Jwts.builder()
+                .setSubject(user.getUsername())
+                .claim("role", user.getRole()) // Include role in the token
+                .setIssuedAt(new Date())
+                .setExpiration(new Date(System.currentTimeMillis() + expirationTimeInMillis))
+                .signWith(SignatureAlgorithm.HS512, secretKey.getBytes()) // Use the secure signing key
+                .compact();
     }
 }

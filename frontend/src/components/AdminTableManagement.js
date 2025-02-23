@@ -1,74 +1,74 @@
+// frontend/src/components/AdminTableManagement.js
 import React, { useEffect, useState } from "react";
-import { getAllOrders, updateOrderStatus } from "../services/api";
+import { getAllTables, updateTableStatus } from "../services/api";
 import { Table, Button, Modal, Form, Pagination } from "react-bootstrap";
+import moment from "moment";
 
-const AdminOrderManagement = ({ token }) => {
-    const [orders, setOrders] = useState([]);
+const AdminTableManagement = ({ token }) => {
+    const [tables, setTables] = useState([]);
     const [showModal, setShowModal] = useState(false);
     const [currentPage, setCurrentPage] = useState(1);
     const [totalPages, setTotalPages] = useState(1);
-    const [editingOrder, setEditingOrder] = useState(null);
+    const [editingTable, setEditingTable] = useState(null);
 
     useEffect(() => {
-        const fetchOrders = async () => {
+        const fetchTables = async () => {
             try {
-                const response = await getAllOrders(token, currentPage - 1, 10);
-                setOrders(response.content);
+                const response = await getAllTables(token, currentPage - 1, 10);
+                setTables(response.content);
                 setTotalPages(response.totalPages);
             } catch (error) {
-                console.error("Error fetching orders:", error);
+                console.error("Error fetching tables:", error);
             }
         };
-        fetchOrders();
+        fetchTables();
     }, [token, currentPage]);
 
     const handleChange = (event, value) => {
         setCurrentPage(value);
     };
 
-    const handleEditOrder = (order) => {
-        setEditingOrder(order);
+    const handleEditTable = (table) => {
+        setEditingTable(table);
         setShowModal(true);
     };
 
-    const handleUpdateOrder = async () => {
+    const handleUpdateTable = async () => {
         try {
-            await updateOrderStatus(editingOrder.id, editingOrder, token);
+            await updateTableStatus(editingTable.id, editingTable, token);
             setShowModal(false);
-            setEditingOrder(null);
-            // Refresh orders
-            const response = await getAllOrders(token, currentPage - 1, 10);
-            setOrders(response.content);
+            setEditingTable(null);
+            // Refresh tables
+            const response = await getAllTables(token, currentPage - 1, 10);
+            setTables(response.content);
             setTotalPages(response.totalPages);
         } catch (error) {
-            console.error("Error updating order:", error);
+            console.error("Error updating table:", error);
         }
     };
 
     return (
         <div>
-            <h2>Order Management</h2>
+            <h2>Table Management</h2>
             <Table striped bordered hover>
                 <thead>
                 <tr>
                     <th>ID</th>
-                    <th>Customer Name</th>
-                    <th>Items</th>
-                    <th>Total Amount</th>
-                    <th>Redeemed Loyalty Points</th>
+                    <th>Status</th>
+                    <th>Reservation Time</th>
+                    <th>Reserved By</th>
                     <th>Actions</th>
                 </tr>
                 </thead>
                 <tbody>
-                {orders.map((order) => (
-                    <tr key={order.id}>
-                        <td>{order.id}</td>
-                        <td>{order.customerName}</td>
-                        <td>{order.items.join(", ")}</td>
-                        <td>${order.totalAmount}</td>
-                        <td>{order.redeemedLoyaltyPoints ? "Yes" : "No"}</td>
+                {tables.map((table) => (
+                    <tr key={table.id}>
+                        <td>{table.id}</td>
+                        <td>{table.status}</td>
+                        <td>{moment(table.reservationTime).format("YYYY-MM-DD HH:mm:ss")}</td>
+                        <td>{table.reservedBy}</td>
                         <td>
-                            <Button variant="warning" onClick={() => handleEditOrder(order)}>
+                            <Button variant="warning" onClick={() => handleEditTable(table)}>
                                 Edit
                             </Button>
                         </td>
@@ -79,44 +79,34 @@ const AdminOrderManagement = ({ token }) => {
             <Pagination className="mt-3" count={totalPages} page={currentPage} onChange={(_, value) => handleChange(_, value)} />
             <Modal show={showModal} onHide={() => setShowModal(false)}>
                 <Modal.Header closeButton>
-                    <Modal.Title>Edit Order</Modal.Title>
+                    <Modal.Title>Edit Table</Modal.Title>
                 </Modal.Header>
                 <Modal.Body>
                     <Form>
-                        <Form.Group controlId="formCustomerName">
-                            <Form.Label>Customer Name</Form.Label>
+                        <Form.Group controlId="formStatus">
+                            <Form.Label>Status</Form.Label>
                             <Form.Control
                                 type="text"
-                                value={editingOrder?.customerName}
-                                onChange={(e) => setEditingOrder({ ...editingOrder, customerName: e.target.value })}
+                                value={editingTable?.status}
+                                onChange={(e) => setEditingTable({ ...editingTable, status: e.target.value })}
                                 required
                             />
                         </Form.Group>
-                        <Form.Group controlId="formItems">
-                            <Form.Label>Items</Form.Label>
+                        <Form.Group controlId="formReservationTime">
+                            <Form.Label>Reservation Time</Form.Label>
+                            <Form.Control
+                                type="datetime-local"
+                                value={moment(editingTable?.reservationTime).format("YYYY-MM-DDTHH:mm:ss")}
+                                onChange={(e) => setEditingTable({ ...editingTable, reservationTime: e.target.value })}
+                                required
+                            />
+                        </Form.Group>
+                        <Form.Group controlId="formReservedBy">
+                            <Form.Label>Reserved By</Form.Label>
                             <Form.Control
                                 type="text"
-                                value={editingOrder?.items.join(", ")}
-                                onChange={(e) => setEditingOrder({ ...editingOrder, items: e.target.value.split(",").map((item) => item.trim()) })}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group controlId="formTotalAmount">
-                            <Form.Label>Total Amount</Form.Label>
-                            <Form.Control
-                                type="number"
-                                step="0.01"
-                                value={editingOrder?.totalAmount}
-                                onChange={(e) => setEditingOrder({ ...editingOrder, totalAmount: parseFloat(e.target.value) })}
-                                required
-                            />
-                        </Form.Group>
-                        <Form.Group controlId="formRedeemedLoyaltyPoints">
-                            <Form.Label>Redeemed Loyalty Points</Form.Label>
-                            <Form.Check
-                                type="switch"
-                                checked={editingOrder?.redeemedLoyaltyPoints}
-                                onChange={(e) => setEditingOrder({ ...editingOrder, redeemedLoyaltyPoints: e.target.checked })}
+                                value={editingTable?.reservedBy}
+                                onChange={(e) => setEditingTable({ ...editingTable, reservedBy: e.target.value })}
                             />
                         </Form.Group>
                     </Form>
@@ -125,7 +115,7 @@ const AdminOrderManagement = ({ token }) => {
                     <Button variant="secondary" onClick={() => setShowModal(false)}>
                         Close
                     </Button>
-                    <Button variant="primary" onClick={handleUpdateOrder}>
+                    <Button variant="primary" onClick={handleUpdateTable}>
                         Save Changes
                     </Button>
                 </Modal.Footer>
@@ -134,4 +124,4 @@ const AdminOrderManagement = ({ token }) => {
     );
 };
 
-export default AdminOrderManagement;
+export default AdminTableManagement;
