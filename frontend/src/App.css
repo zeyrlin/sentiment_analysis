@@ -1,0 +1,41 @@
+.App {
+  text-align: center;
+  padding: 20px;
+}
+
+.App-header {
+  background-color: #28a745;
+  color: white;
+  padding: 20px;
+  border-radius: 10px;
+  margin-bottom: 20px;
+}
+
+.App-header button {
+  margin-left: 10px;
+  background-color: #fff;
+  color: #28a745;
+  border: 2px solid #28a745;
+  border-radius: 5px;
+  padding: 10px 20px;
+  cursor: pointer;
+}
+
+.App-header button:hover {
+  background-color: #28a745;
+  color: #fff;
+}
+
+.d-flex.flex-wrap {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+}
+
+.card {
+  margin: 10px;
+}
+
+.card button {
+  margin-top: 10px;
+}

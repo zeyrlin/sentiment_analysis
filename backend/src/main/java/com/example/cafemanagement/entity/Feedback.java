@@ -16,6 +16,9 @@ public class Feedback {
     @Column(nullable = false)
     private String sentiment;
 
+    @Column(nullable = false)
+    private String username;
+
     @Column(nullable = false, updatable = false)
     private LocalDateTime createdAt;
 
@@ -24,9 +27,10 @@ public class Feedback {
         this.createdAt = LocalDateTime.now();
     }
 
-    public Feedback(String review, String sentiment) {
+    public Feedback(String review, String sentiment, String username) {
         this.review = review;
         this.sentiment = sentiment;
+        this.username = username;
         this.createdAt = LocalDateTime.now();
     }
 
@@ -53,6 +57,14 @@ public class Feedback {
 
     public void setSentiment(String sentiment) {
         this.sentiment = sentiment;
+    }
+
+    public String getUsername() {
+        return username;
+    }
+
+    public void setUsername(String username) {
+        this.username = username;
     }
 
     public LocalDateTime getCreatedAt() {

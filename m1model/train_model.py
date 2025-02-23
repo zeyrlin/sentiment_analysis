@@ -6,10 +6,17 @@ from sklearn.metrics import accuracy_score
 import joblib
 
 # Load dataset
-# If there are no headers, use column indices
-data = pd.read_csv('customer_reviews.csv', header=None)
-X = data[0]  # First column for reviews
-y = data[1]  # Second column for sentiment labels
+data = pd.read_csv('reviews2.csv')  # Ensure the file path is correct
+
+# Verify the column names
+print(data.head())
+
+# Ensure the column names are correct
+if 'review' not in data.columns or 'sentiment' not in data.columns:
+    raise ValueError("CSV file must contain 'review' and 'sentiment' columns.")
+
+X = data['review']
+y = data['sentiment'].astype(int)  # Convert sentiment to integer
 
 # Preprocess and vectorize
 vectorizer = CountVectorizer(stop_words='english')
